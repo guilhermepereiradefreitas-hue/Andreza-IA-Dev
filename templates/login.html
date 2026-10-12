@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CodeFusion IA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body">
+    <div class="auth-card">
+        <h2>Entrar na CodeFusion IA</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="POST">
+            <input type="text" name="username" placeholder="Nome de usuário" required>
+            <input type="password" name="password" placeholder="Senha" required>
+            <button type="submit" class="auth-btn">Entrar</button>
+        </form>
+        <p class="auth-link">Não tem uma conta? <a href="{{ url_for('register') }}">Cadastre-se</a></p>
+    </div>
+</body>
+</html>

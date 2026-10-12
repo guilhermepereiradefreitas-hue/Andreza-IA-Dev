@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeFusion IA - Análise de Dados</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="brand-container">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="app-logo">
+                    <span class="app-title">CodeFusion IA</span>
+                </div>
+                <button class="new-chat-btn" id="new-chat-btn"><i class="fa-solid fa-plus"></i> Novo Chat</button>
+            </div>
+
+            <div class="sidebar-history" id="sidebar-history">
+                <!-- Histórico carregado dinamicamente -->
+            </div>
+
+            <!-- Rodapé da Barra Lateral com Dados do Usuário e Conexão Google -->
+            <div class="sidebar-footer" style="padding: 10px; border-top: 1px solid #2f2f2f; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #aaa;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fa-solid fa-user"></i> {{ username }}</span>
+                    <a href="{{ url_for('logout') }}" title="Sair" style="color: #ff6b6b; text-decoration: none;"><i class="fa-solid fa-right-from-bracket"></i></a>
+                </div>
+                <div id="google-auth-container">
+                    <a href="{{ url_for('google_auth') }}" id="google-link" style="display: flex; align-items: center; gap: 6px; color: #fbbc05; text-decoration: none; font-size: 12px;">
+                        <i class="fa-brands fa-google"></i> <span id="google-status-text">Conectar Conta Google</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <header class="chat-header">
+                <div class="model-selector">
+                    <select id="llm-model">
+                        <option value="gpt-4o">GPT-4o (OpenAI)</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Google)</option>
+                    </select>
+                </div>
+            </header>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="welcome-banner" id="welcome-banner">
+                    <h1>{{ saudacao }}, como posso ajudar na sua análise de dados e planilhas hoje?</h1>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="input-wrapper">
+                    <label for="file-upload" class="upload-btn" title="Anexar Planilha (Excel/CSV)"><i class="fa-solid fa-paperclip"></i></label>
+                    <input type="file" id="file-upload" accept=".csv, .xlsx, .xls" style="display: none;">
+
+                    <textarea id="user-input" placeholder="Envie uma mensagem ou anexe uma planilha para análise..."></textarea>
+
+                    <span id="file-indicator" style="font-size: 11px; color: #4CAF50; display: none; margin-right: 8px;">Arquivo pronto</span>
+                    <button id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentChatId = null;
+        let selectedFile = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            carregarHistoricoChats();
+            verificarStatusGoogle();
+
+            document.getElementById('new-chat-btn').addEventListener('click', iniciarNovoChat);
+            document.getElementById('send-btn').addEventListener('click', enviarMensagem);
+
+            const fileInput = document.getElementById('file-upload');
+            fileInput.addEventListener('change', (e) => {
+                selectedFile = e.target.files[0];
+                const indicator = document.getElementById('file-indicator');
+                if (selectedFile) {
+                    indicator.innerText = selectedFile.name;
+                    indicator.style.display = 'inline';
+                } else {
+                    indicator.style.display = 'none';
+                }
+            });
+
+            document.getElementById('user-input').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    enviarMensagem();
+                }
+            });
+        });
+
+        async function verificarStatusGoogle() {
+            try {
+                const res = await fetch('/api/google/status');
+                const data = await res.json();
+                const statusText = document.getElementById('google-status-text');
+                const googleLink = document.getElementById('google-link');
+                if (data.conectado) {
+                    statusText.innerText = "Google Conectado";
+                    googleLink.style.color = "#4CAF50";
+                } else {
+                    statusText.innerText = "Conectar Conta Google";
+                    googleLink.style.color = "#fbbc05";
+                }
+            } catch (err) {
+                console.error("Erro ao verificar status Google:", err);
+            }
+        }
+
+        async function carregarHistoricoChats() {
+            try {
+                const res = await fetch('/api/chats');
+                const chats = await res.json();
+                const historyContainer = document.getElementById('sidebar-history');
+                historyContainer.innerHTML = '';
+
+                chats.forEach(chat => {
+                    const item = document.createElement('div');
+                    item.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
+                    item.innerText = chat.title;
+                    item.onclick = () => selecionarChat(chat.id);
+                    historyContainer.appendChild(item);
+                });
+            } catch (err) {
+                console.error("Erro ao carregar histórico:", err);
+            }
+        }
+
+        async function selecionarChat(chatId) {
+            currentChatId = chatId;
+            carregarHistoricoChats();
+
+            try {
+                const res = await fetch(`/api/chats/${chatId}/messages`);
+                const mensagens = await res.json();
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.innerHTML = '';
+
+                if (mensagens.length === 0) {
+                    chatMessages.innerHTML = `<div class="welcome-banner"><h1>{{ saudacao }}, como posso ajudar na sua análise de dados hoje?</h1></div>`;
+                    return;
+                }
+
+                mensagens.forEach(msg => {
+                    if (msg.sender === 'user') {
+                        chatMessages.innerHTML += `
+                            <div class="message user-message" style="margin: 10px 0; padding: 10px; background: #2f2f2f; border-radius: 8px; max-width: 80%; align-self: flex-end;">
+                                <p><strong>Você:</strong> ${msg.content}</p>
+                            </div>`;
+                    } else {
+                        chatMessages.innerHTML += `
+                            <div class="message ai-message" style="margin: 10px 0; padding: 10px; background: #171717; border-radius: 8px; max-width: 80%; border: 1px solid #2f2f2f;">
+                                <p><strong>CodeFusion IA:</strong></p>
+                                <p style="white-space: pre-wrap; margin-top: 5px;">${msg.content}</p>
+                            </div>`;
+                    }
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } catch (err) {
+                console.error("Erro ao carregar mensagens:", err);
+            }
+        }
+
+        function iniciarNovoChat() {
+            currentChatId = null;
+            selectedFile = null;
+            document.getElementById('file-upload').value = '';
+            document.getElementById('file-indicator').style.display = 'none';
+            document.getElementById('chat-messages').innerHTML = `<div class="welcome-banner" id="welcome-banner"><h1>{{ saudacao }}, como posso ajudar na sua análise de dados hoje?</h1></div>`;
+            carregarHistoricoChats();
+        }
+
+        async function enviarMensagem() {
+            const input = document.getElementById('user-input');
+            const mensagem = input.value.trim();
+            const modelo = document.getElementById('llm-model').value;
+
+            if (!mensagem && !selectedFile) return;
+
+            const chatMessages = document.getElementById('chat-messages');
+            const welcomeBanner = document.getElementById('welcome-banner');
+            if (welcomeBanner) welcomeBanner.remove();
+
+            let displayText = mensagem;
+            if (selectedFile) displayText += ` 📎 [${selectedFile.name}]`;
+
+            chatMessages.innerHTML += `
+                <div class="message user-message" style="margin: 10px 0; padding: 10px; background: #2f2f2f; border-radius: 8px; max-width: 80%; align-self: flex-end;">
+                    <p><strong>Você:</strong> ${displayText}</p>
+                </div>`;
+
+            const formData = new FormData();
+            formData.append("chat_id", currentChatId);
+            formData.append("mensagem", mensagem);
+            formData.append("modelo", modelo);
+            if (selectedFile) {
+                formData.append("file", selectedFile);
+            }
+
+            input.value = '';
+            selectedFile = null;
+            document.getElementById('file-upload').value = '';
+            document.getElementById('file-indicator').style.display = 'none';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                currentChatId = data.chat_id;
+
+                let aiHtml = `<p style="white-space: pre-wrap; margin-top: 5px;">${data.resposta}</p>`;
+                if (data.chart_url) {
+                    aiHtml += `<div style="margin-top: 10px;"><img src="${data.chart_url}" alt="Gráfico de Análise" style="max-width: 100%; border-radius: 6px;"></div>`;
+                }
+
+                chatMessages.innerHTML += `
+                    <div class="message ai-message" style="margin: 10px 0; padding: 10px; background: #171717; border-radius: 8px; max-width: 80%; border: 1px solid #2f2f2f;">
+                        <p><strong>CodeFusion IA (${modelo}):</strong></p>
+                        ${aiHtml}
+                    </div>`;
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                carregarHistoricoChats();
+            } catch (error) {
+                console.error("Erro:", error);
+            }
+        }
+    </script>
+</body>
+</html>
