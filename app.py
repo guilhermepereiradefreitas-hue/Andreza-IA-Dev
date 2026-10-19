@@ -161,6 +161,27 @@ def listar_mensagens(chat_id):
     return jsonify(mensagens)
 
 
+@app.route("/api/chats/<int:chat_id>", methods=["DELETE"])
+@login_required
+def excluir_chat(chat_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "DELETE FROM chats WHERE id = %s AND user_id = %s RETURNING id",
+        (chat_id, current_user.id)
+    )
+    chat_excluido = cursor.fetchone()
+    if not chat_excluido:
+        cursor.close()
+        conn.close()
+        return jsonify({"erro": "Chat não encontrado"}), 404
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({"excluido": True})
+
+
 @app.route("/api/chat", methods=["POST"])
 @login_required
 def chat():

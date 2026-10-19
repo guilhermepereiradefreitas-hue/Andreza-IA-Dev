@@ -1,22 +1,40 @@
 import os
+import time
 import matplotlib
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 from openai import OpenAI
-import google.generativeai as genai
+from google import genai
+from google.genai import errors as genai_errors
 from dotenv import load_dotenv
 from rag_service import buscar_memorias_relevantes
 
 load_dotenv()
 
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
+def _gerar_resposta_gemini(modelo, prompt):
+    for tentativa in range(3):
+        try:
+            return gemini_client.models.generate_content(model=modelo, contents=prompt)
+        except genai_errors.ServerError as erro:
+            if erro.code != 503:
+                raise
+            if tentativa == 2:
+                raise RuntimeError(
+                    "O Gemini está temporariamente indisponível (erro 503). "
+                    "Tente novamente em alguns minutos ou selecione outro modelo."
+                ) from erro
+            time.sleep(1.5 * (2 ** tentativa))
+
+
+# noinspection bad-argument-type
 def gerar_resposta_llm(modelo, mensagem, user_id=None, df=None):
-    """Gera resposta da IA injetando memórias de longo prazo (RAG) e dados analíticos se disponíveis."""
+    """Gera resposta da IA a injetar memórias de longo prazo (RAG) e dados analíticos se disponíveis."""
     try:
         contexto_rag = ""
         if user_id:
@@ -31,7 +49,7 @@ def gerar_resposta_llm(modelo, mensagem, user_id=None, df=None):
             contexto_dados = f"\n\n[DADOS ANALISADOS VIA PANDAS]:\nEstatísticas descritivas:\n{resumo_estatistico}\n"
 
         prompt_sistema = (
-            "Você é a CodeFusion IA, uma assistente especialista em engenharia de dados, Python, "
+            "Você é a Andreza IA, uma assistente especialista em engenharia de dados, Python, "
             "análise avançada e automação de planilhas com Google Sheets. "
             "Utilize a memória de longo prazo fornecida para responder com precisão a perguntas sobre dados anteriores."
         )
@@ -46,12 +64,10 @@ def gerar_resposta_llm(modelo, mensagem, user_id=None, df=None):
                     {"role": "user", "content": prompt_completo}
                 ],
                 temperature=0.7
-            ]
+            )
             resposta_texto = response.choices[0].message.content
         elif "gemini" in modelo.lower():
-            model_name = "gemini-1.5-pro" if "1.5" in modelo else "gemini-pro"
-            gemini_model = genai.GenerativeModel(model_name)
-            response = gemini_model.generate_content(prompt_completo)
+            response = _gerar_resposta_gemini(modelo, prompt_completo)
             resposta_texto = response.text
         else:
             resposta_texto = f"Modelo '{modelo}' não reconhecido."

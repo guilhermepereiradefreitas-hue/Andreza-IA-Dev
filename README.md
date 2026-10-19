@@ -1,125 +1,181 @@
-# 🤖 Andreza IA
+<p align="center">
+  <img src="static/img/login.png" alt="Andreza IA" width="720">
+</p>
 
-**Andreza IA** é uma aplicação web profissional de Inteligência Artificial desenvolvida em Python (Flask) inspirada na interface do ChatGPT. Ela foi projetada especialmente para **análise avançada de dados**, processamento de arquivos CSV/Excel, **geração automática de gráficos**, **memória de longo prazo (RAG com pgvector)** e **automação e preenchimento de planilhas via Google Sheets API (com OAuth2 por usuário)**.
+<h1 align="center">Andreza IA</h1>
 
----
+<p align="center">
+  Assistente de inteligência artificial para análise de dados, planilhas e automação.
+</p>
 
-## 🚀 Funcionalidades Principais
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python 3.11 ou superior">
+  <img src="https://img.shields.io/badge/Flask-3.x-000000?logo=flask&logoColor=white" alt="Flask 3">
+  <img src="https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL e pgvector">
+</p>
 
-- **Interface Moderna (Dark Mode)**: Layout idêntico ao ChatGPT, com barra lateral de navegação e seletor de modelos.
-- **Autenticação Segura**: Sistema de login e cadastro de usuários com senhas criptografadas (`Flask-Bcrypt`).
-- **Troca Dinâmica de Modelos de LLM**: Alterne instantaneamente entre **GPT-4o (OpenAI)** e **Gemini 1.5 Pro (Google)** diretamente na interface.
-- **Histórico Dinâmico de Chats**: Suporte completo para criar novos chats, alternar conversas e salvar todo o histórico no **PostgreSQL**.
-- **Upload e Análise Avançada de Dados**: Envie arquivos `.csv`, `.xlsx` ou `.xls` para que o Pandas faça resumos estatísticos automáticos e a IA responda baseada nos dados.
-- **Geração de Gráficos Analíticos**: A IA detecta pedidos de visualização e gera gráficos dinâmicos (`.png`) direto na tela do chat.
-- **Automação Google Sheets (OAuth2 Individual)**: Cada usuário pode conectar sua própria conta Google para ler e preencher planilhas no seu Google Drive pessoal.
-- **Memória de Longo Prazo (RAG com pgvector)**: Vetorização semântica de conversas e arquivos passados usando a extensão `pgvector` do PostgreSQL e embeddings da OpenAI (`text-embedding-3-small`).
+## Sobre o projeto
 
----
+A Andreza IA é uma aplicação web desenvolvida em Python e Flask, com uma interface escura inspirada em assistentes de IA. Ela combina modelos de linguagem com ferramentas para análise de arquivos, visualização de dados, histórico de conversas, memória semântica e integração opcional com o Google Sheets.
 
-## 📁 Estrutura do Projeto
+## Amostras do sistema
 
-```text
-chatgpt-assistente-dados/
-│
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   ├── img/
-│   │   └── logo.png  <-- (Coloque sua logo aqui)
-│   └── charts/       <-- (Gráficos gerados automaticamente)
-│
-├── templates/
-│   ├── index.html
-│   ├── login.html
-│   └── register.html
-│
-├── uploads/          <-- (Planilhas enviadas temporariamente)
-├── .env
-├── requirements.txt
-├── database.py
-├── rag_service.py
-├── llm_service.py
-├── google_sheets.py
-├── app.py
-└── README.md
+<p align="center">
+  <img src="static/img/Tela%20de%20login.png" alt="Tela de login da Andreza IA" width="900">
+</p>
+<p align="center"><em>Tela de login</em></p>
 
-🛠️ Passo a Passo de Instalação e Execução
-1. Pré-requisitos
-Python 3.10+ instalado.
+<p align="center">
+  <img src="static/img/interfac.png" alt="Interface principal da Andreza IA" width="900">
+</p>
+<p align="center"><em>Interface de conversa</em></p>
 
-PostgreSQL instalado e rodando na sua máquina.
+<p align="center">
+  <img src="static/img/pesquisa.png" alt="Exemplo de conversa e resposta da Andreza IA" width="900">
+</p>
+<p align="center"><em>Exemplo de pesquisa e resposta</em></p>
 
-2. Clonar ou Criar a Pasta do Projeto
-Abra o seu terminal na pasta do projeto e crie um ambiente virtual:
+## Funcionalidades
 
-``bash
-python -m venv venv
-venv\Scripts\activate  # No Windows
-source venv/bin/activate  # No Linux/Mac
+- **Conversas:** criar conversas, consultar o histórico, pesquisar conversas e excluir chats.
+- **Modelos de IA:** selecionar GPT-4o (OpenAI) ou Gemini 2.5 Flash (Google) pela interface.
+- **Análise de arquivos:** enviar arquivos CSV e Excel (`.xlsx` e `.xls`) para análise com Pandas.
+- **Gráficos:** gerar gráficos PNG quando a solicitação de análise pede uma visualização compatível.
+- **Memória semântica (RAG):** armazenar trechos de conversas e recuperar contexto relevante com embeddings OpenAI e pgvector.
+- **Google Sheets:** conectar uma conta Google individual via OAuth 2.0 e acrescentar valores a uma planilha autorizada.
+- **Contas de usuário:** cadastro, login e senhas armazenadas com hash via Flask-Bcrypt.
+- **Experiência de uso:** interface responsiva em português, sugestões de prompts, anexos e cópia de respostas.
+
+## Tecnologias
+
+- Python, Flask, Flask-Login e Flask-Bcrypt
+- PostgreSQL e extensão pgvector
+- OpenAI API e Google GenAI API
+- Pandas, Matplotlib, Seaborn e OpenPyXL
+- Google Sheets API e OAuth 2.0
+
+## Pré-requisitos
+
+- Python 3.11 ou superior
+- PostgreSQL em execução
+- Extensão [pgvector](https://github.com/pgvector/pgvector) instalada no servidor PostgreSQL
+- Chaves de API dos provedores que serão utilizados
+- (Opcional) Projeto Google Cloud configurado para OAuth e Google Sheets API
+
+## Instalação
+
+### 1. Criar e ativar um ambiente virtual
+
+Na raiz do projeto, execute:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+No macOS ou Linux:
+
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-3. Instalar as Dependências
-Instalaremos todas as bibliotecas necessárias (Flask, Pandas, OpenAI, Google GenAI, pgvector, etc.):
-
-```bash
-pip install -r requirements.txt
-
-4. Configurar as Variáveis de Ambiente (.env)
-Crie um arquivo chamado .env na raiz do projeto e preencha com as suas chaves e dados:
+### 2. Instalar as dependências
 
 ```bash
+python -m pip install -r requirements.txt
+```
+
+### 3. Criar o banco de dados
+
+No PostgreSQL, crie o banco utilizado pela aplicação. Exemplo pelo `psql`:
+
+```sql
+CREATE DATABASE assistente_db;
+```
+
+Confirme que o pgvector está instalado no servidor. O comando `python database.py`, na próxima etapa, habilita a extensão no banco e cria as tabelas da aplicação.
+
+### 4. Configurar variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto. Preencha os valores localmente; não compartilhe nem envie esse arquivo ao Git:
+
+```dotenv
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=assistente_db
 DB_USER=postgres
 DB_PASSWORD=sua_senha_do_postgres
-SECRET_KEY=sua_chave_secreta_super_segura
-OPENAI_API_KEY=sua_chave_da_openai_aqui
-GEMINI_API_KEY=sua_chave_do_gemini_aqui
-```bash
 
-5. Como Ativar e Testar o Banco Vetorial (pgvector)
-Certifique-se de ter instalado a extensão vector no seu PostgreSQL (se usar PostgreSQL local, abra o psql ou pgAdmin e execute CREATE EXTENSION vector; no banco assistente_db).
+SECRET_KEY=gere_uma_chave_secreta_forte
+OPENAI_API_KEY=sua_chave_openai
+GEMINI_API_KEY=sua_chave_google_gemini
+```
 
-Instale as dependências: pip install -r requirements.txt.
+`OPENAI_API_KEY` é usada pelo GPT-4o e pela geração de embeddings da memória RAG. `GEMINI_API_KEY` é necessária quando o modelo Gemini for selecionado. Use uma chave forte e privada em `SECRET_KEY`.
 
-Rode o script de banco de dados para criar as tabelas e ativar o suporte vetorial:
+### 5. Inicializar as tabelas
 
-```bash
-python database.py  
-```bash
-
-6. Configurar o Google Cloud (Opcional para Google Sheets)
-Acesse o Google Cloud Console.
-
-Ative a Google Sheets API e a Google Drive API.
-
-Crie credenciais do tipo OAuth 2.0 (Aplicativo para Computador).
-
-Baixe o arquivo JSON de credenciais, renomeie para credentials.json e coloque na raiz do projeto.
-
-Na barra lateral da aplicação web, clique em "Conectar Conta Google" para vincular o seu usuário via OAuth.
-
-7. Executar a Aplicação
-
-No terminal, execute o seguinte comando para iniciar a aplicação:
+Com o ambiente virtual ativo e o PostgreSQL configurado:
 
 ```bash
-python app.py 
+python database.py
+```
 
-8. Acessar a Aplicação
-Abra o navegador em: http://localhost:5000
+### 6. (Opcional) Configurar o Google Sheets
 
-📖 Manual de Uso
-Login / Cadastro: Ao acessar pela primeira vez, crie sua conta ou faça login.
+1. No [Google Cloud Console](https://console.cloud.google.com/), crie ou selecione um projeto.
+2. Ative a Google Sheets API e configure a tela de consentimento OAuth.
+3. Crie um cliente OAuth 2.0 do tipo **Aplicativo da Web** e adicione `http://localhost:5000/google/callback` como URI de redirecionamento autorizado.
+4. Baixe o JSON de credenciais, salve-o como `credentials.json` na raiz do projeto e mantenha-o privado.
+5. Inicie a aplicação, entre na sua conta e clique em **Conectar Google**.
 
-Nova Conversa: Clique em "Novo Chat" na barra lateral para iniciar um novo tópico (o título será gerado automaticamente).
+O OAuth solicita permissões de planilhas e leitura do Drive. O endpoint disponível na aplicação acrescenta linhas à planilha indicada.
 
-Seleção de Modelo: No topo da tela, escolha entre GPT-4o e Gemini 1.5 Pro conforme sua preferência.
+### 7. Iniciar a aplicação
 
-Envio de Planilhas e Gráficos: Clique no ícone de clipe de papel (📎) na caixa de texto, envie um arquivo .csv ou .xlsx e digite comandos como: "Analise os dados e gere um gráfico de tendência".
+```bash
+python app.py
+```
 
-Memória RAG: Pergunte à IA sobre conteúdos enviados em conversas ou planilhas anteriores; ela buscará o contexto vetorial automaticamente.
+Acesse [http://localhost:5000](http://localhost:5000), crie uma conta e entre na aplicação.
 
-Desenvolvido com dedicação por Guilherme Pereira de Freitas ( Andreza IA ) - 2026.
+## Como usar
+
+1. Entre ou crie uma conta.
+2. Inicie uma conversa ou selecione uma conversa existente no histórico.
+3. Escolha GPT-4o ou Gemini 2.5 Flash no seletor de modelos.
+4. Para analisar uma planilha, anexe um arquivo CSV ou Excel e escreva sua pergunta.
+5. Peça um gráfico na mensagem para visualizar os dados quando houver colunas numéricas compatíveis.
+6. Conecte sua conta Google para autorizar o uso da integração com planilhas.
+
+## Estrutura do projeto
+
+```text
+.
+├── app.py                   # Aplicação Flask, autenticação e rotas
+├── database.py              # Conexão e inicialização do PostgreSQL
+├── google_sheets.py         # OAuth por usuário e integração com Sheets
+├── llm_service.py           # Chamadas aos modelos e criação de gráficos
+├── rag_service.py           # Embeddings e memória semântica
+├── requirements.txt         # Dependências Python
+├── static/
+│   ├── css/style.css        # Estilos da aplicação
+│   ├── img/                 # Marca e capturas de tela
+│   └── charts/              # Gráficos gerados
+├── templates/
+│   ├── index.html           # Interface principal
+│   ├── login.html           # Tela de login
+│   └── register.html        # Tela de cadastro
+└── uploads/                 # Arquivos enviados para análise
+```
+
+## Observações
+
+- O Gemini pode ficar temporariamente indisponível. Para respostas 503, a aplicação tenta novamente e informa quando é necessário aguardar ou trocar de modelo.
+- A análise de arquivos é feita durante o processamento da mensagem. Evite enviar documentos com dados sensíveis que não devam ser compartilhados com os provedores de IA configurados.
+- As chaves de API, `credentials.json` e o arquivo `.env` devem permanecer privados.
+
+---
+
+<p align="center">Andreza IA&reg; &#8226; Desenvolvida por Guilherme Pereira &#8226; Todos os direitos reservados</p>

@@ -3,241 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeFusion IA - Análise de Dados</title>
+    <meta name="theme-color" content="#171717">
+    <title>Andreza IA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar -->
+        <nav class="icon-rail" aria-label="Navegação principal">
+            <button class="rail-button active" type="button" aria-label="Início" title="Início">
+                <i class="fa-solid fa-house"></i>
+            </button>
+            <button class="rail-button" id="history-shortcut" type="button" aria-label="Buscar conversas" title="Buscar conversas">
+                <i class="fa-regular fa-comments"></i>
+            </button>
+            <a class="rail-button" href="{{ url_for('google_auth') }}" aria-label="Conectar Google" title="Conectar Google">
+                <i class="fa-brands fa-google"></i>
+            </a>
+            <a class="rail-button rail-account" href="{{ url_for('logout') }}" aria-label="Sair da conta de {{ username }}" title="Sair">
+                {{ username[:2]|upper }}
+            </a>
+        </nav>
+
         <aside class="sidebar">
-            <div class="sidebar-top">
-                <div class="brand-container">
-                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="app-logo">
-                    <span class="app-title">CodeFusion IA</span>
-                </div>
-                <button class="new-chat-btn" id="new-chat-btn"><i class="fa-solid fa-plus"></i> Novo Chat</button>
+            <div class="sidebar-heading">
+                <a class="brand" href="{{ url_for('index') }}" aria-label="Andreza IA - início">
+                    <span class="brand-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <span>Andreza IA</span>
+                    <i class="fa-solid fa-chevron-down brand-chevron"></i>
+                </a>
+                <button class="icon-button" id="search-toggle" type="button" aria-label="Buscar conversas" title="Buscar conversas">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
             </div>
 
-            <div class="sidebar-history" id="sidebar-history">
-                <!-- Histórico carregado dinamicamente -->
+            <button class="new-chat-btn" id="new-chat-btn" type="button">
+                <i class="fa-regular fa-pen-to-square"></i>
+                <span>Nova conversa</span>
+                <span class="shortcut-hint">＋</span>
+            </button>
+
+            <div class="history-section">
+                <div class="section-heading">
+                    <span>Conversas recentes</span>
+                    <span class="history-count" id="history-count"></span>
+                </div>
+                <label class="history-search" id="history-search-wrap" hidden>
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <input id="history-search" type="search" placeholder="Buscar conversas" autocomplete="off" aria-label="Buscar conversas">
+                    <button class="search-close icon-button" id="search-close" type="button" aria-label="Fechar busca">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </label>
+                <div class="sidebar-history" id="sidebar-history" aria-live="polite">
+                    <p class="history-placeholder">Carregando conversas...</p>
+                </div>
             </div>
 
-            <!-- Rodapé da Barra Lateral com Dados do Usuário e Conexão Google -->
-            <div class="sidebar-footer" style="padding: 10px; border-top: 1px solid #2f2f2f; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #aaa;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span><i class="fa-solid fa-user"></i> {{ username }}</span>
-                    <a href="{{ url_for('logout') }}" title="Sair" style="color: #ff6b6b; text-decoration: none;"><i class="fa-solid fa-right-from-bracket"></i></a>
-                </div>
-                <div id="google-auth-container">
-                    <a href="{{ url_for('google_auth') }}" id="google-link" style="display: flex; align-items: center; gap: 6px; color: #fbbc05; text-decoration: none; font-size: 12px;">
-                        <i class="fa-brands fa-google"></i> <span id="google-status-text">Conectar Conta Google</span>
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <span class="avatar">{{ username[:2]|upper }}</span>
+                    <span class="user-details">
+                        <strong>{{ username }}</strong>
+                        <span>Plano pessoal</span>
+                    </span>
+                    <a class="icon-button logout-button" href="{{ url_for('logout') }}" aria-label="Sair da conta" title="Sair">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     </a>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Chat Area -->
         <main class="chat-main">
             <header class="chat-header">
-                <div class="model-selector">
-                    <select id="llm-model">
-                        <option value="gpt-4o">GPT-4o (OpenAI)</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Google)</option>
+                <button class="mobile-menu-button icon-button" id="mobile-menu-toggle" type="button" aria-label="Abrir menu" title="Conversas">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="header-model">
+                    <label for="llm-model" class="sr-only">Modelo de inteligência artificial</label>
+                    <select id="llm-model" aria-label="Modelo de inteligência artificial">
+                        <option value="gpt-4o">GPT-4o</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                     </select>
+                    <span class="model-provider">Modelo de IA</span>
+                </div>
+                <div class="header-actions">
+                    <a class="google-connect" id="google-link" href="{{ url_for('google_auth') }}">
+                        <i class="fa-brands fa-google"></i>
+                        <span id="google-status-text">Conectar Google</span>
+                    </a>
                 </div>
             </header>
 
-            <div class="chat-messages" id="chat-messages">
+            <section class="chat-messages" id="chat-messages" aria-live="polite" aria-label="Mensagens da conversa">
                 <div class="welcome-banner" id="welcome-banner">
-                    <h1>{{ saudacao }}, como posso ajudar na sua análise de dados e planilhas hoje?</h1>
+                    <img class="welcome-icon" src="{{ url_for('static', filename='img/imag.png') }}" alt="Andreza IA">
+                    <p class="welcome-eyebrow">Sua assistente para dados e ideias</p>
+                    <h1>{{ saudacao }}. O que vamos criar?</h1>
+                    <p class="welcome-description">Converse com a Andreza, analise planilhas ou transforme uma ideia em realidade.</p>
+                    <div class="prompt-suggestions" aria-label="Sugestões de conversa">
+                        <button class="prompt-card" type="button" data-prompt="Analise esta planilha e destaque os principais insights">
+                            <i class="fa-solid fa-chart-column"></i>
+                            <span><strong>Analisar uma planilha</strong><small>Encontre tendências e insights</small></span>
+                        </button>
+                        <button class="prompt-card" type="button" data-prompt="Crie um gráfico claro para apresentar os principais dados">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span><strong>Criar um gráfico</strong><small>Visualize seus dados</small></span>
+                        </button>
+                        <button class="prompt-card" type="button" data-prompt="Me ajude a automatizar uma tarefa repetitiva">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span><strong>Automatizar uma tarefa</strong><small>Comece com uma ideia</small></span>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </section>
 
             <div class="chat-input-area">
-                <div class="input-wrapper">
-                    <label for="file-upload" class="upload-btn" title="Anexar Planilha (Excel/CSV)"><i class="fa-solid fa-paperclip"></i></label>
-                    <input type="file" id="file-upload" accept=".csv, .xlsx, .xls" style="display: none;">
-
-                    <textarea id="user-input" placeholder="Envie uma mensagem ou anexe uma planilha para análise..."></textarea>
-
-                    <span id="file-indicator" style="font-size: 11px; color: #4CAF50; display: none; margin-right: 8px;">Arquivo pronto</span>
-                    <button id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                <div class="composer">
+                    <div class="attachment-preview" id="file-indicator" hidden>
+                        <i class="fa-regular fa-file-lines"></i>
+                        <span id="file-name"></span>
+                        <button class="icon-button" id="remove-file" type="button" aria-label="Remover arquivo">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <textarea id="user-input" rows="1" placeholder="Pergunte qualquer coisa..." aria-label="Escreva sua mensagem"></textarea>
+                    <div class="composer-toolbar">
+                        <div class="composer-tools">
+                            <label for="file-upload" class="tool-button" title="Anexar planilha CSV ou Excel">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Anexar arquivo</span>
+                            </label>
+                            <input type="file" id="file-upload" accept=".csv,.xlsx,.xls" hidden>
+                            <span class="composer-hint">Enter para enviar · Shift + Enter para nova linha</span>
+                        </div>
+                        <div class="composer-actions">
+                            <label class="model-compact-label" for="llm-model">Andreza ·</label>
+                            <button class="send-button" id="send-btn" type="button" aria-label="Enviar mensagem" title="Enviar mensagem">
+                                <i class="fa-solid fa-arrow-up"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+                <p class="privacy-note">A Andreza pode cometer erros. Confira informações importantes.</p>
             </div>
         </main>
     </div>
 
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
     <script>
         let currentChatId = null;
         let selectedFile = null;
+        let allChats = [];
+        let toastTimeout;
 
-        document.addEventListener("DOMContentLoaded", () => {
+        const elements = {
+            history: document.getElementById('sidebar-history'),
+            search: document.getElementById('history-search'),
+            searchWrap: document.getElementById('history-search-wrap'),
+            messages: document.getElementById('chat-messages'),
+            input: document.getElementById('user-input'),
+            fileInput: document.getElementById('file-upload'),
+            fileIndicator: document.getElementById('file-indicator'),
+            sendButton: document.getElementById('send-btn')
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
             carregarHistoricoChats();
             verificarStatusGoogle();
 
             document.getElementById('new-chat-btn').addEventListener('click', iniciarNovoChat);
-            document.getElementById('send-btn').addEventListener('click', enviarMensagem);
+            document.getElementById('history-shortcut').addEventListener('click', abrirBusca);
+            document.getElementById('search-toggle').addEventListener('click', abrirBusca);
+            document.getElementById('search-close').addEventListener('click', fecharBusca);
+            document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('mobile-open');
+            });
+            elements.search.addEventListener('input', renderizarHistorico);
+            elements.sendButton.addEventListener('click', enviarMensagem);
+            document.getElementById('remove-file').addEventListener('click', removerArquivo);
 
-            const fileInput = document.getElementById('file-upload');
-            fileInput.addEventListener('change', (e) => {
-                selectedFile = e.target.files[0];
-                const indicator = document.getElementById('file-indicator');
-                if (selectedFile) {
-                    indicator.innerText = selectedFile.name;
-                    indicator.style.display = 'inline';
-                } else {
-                    indicator.style.display = 'none';
+            elements.fileInput.addEventListener('change', () => {
+                const arquivo = elements.fileInput.files[0];
+                if (arquivo && arquivo.size > 20 * 1024 * 1024) {
+                    mostrarAviso('O arquivo deve ter no máximo 20 MB.');
+                    removerArquivo();
+                    return;
+                }
+                selecionarArquivo(arquivo || null);
+            });
+
+            elements.input.addEventListener('input', ajustarAlturaEntrada);
+            elements.input.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    enviarMensagem();
                 }
             });
 
-            document.getElementById('user-input').addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    enviarMensagem();
-                }
+            document.querySelectorAll('.prompt-card').forEach((card) => {
+                card.addEventListener('click', () => {
+                    elements.input.value = card.dataset.prompt;
+                    elements.input.focus();
+                    ajustarAlturaEntrada();
+                });
             });
         });
 
         async function verificarStatusGoogle() {
             try {
-                const res = await fetch('/api/google/status');
-                const data = await res.json();
-                const statusText = document.getElementById('google-status-text');
-                const googleLink = document.getElementById('google-link');
-                if (data.conectado) {
-                    statusText.innerText = "Google Conectado";
-                    googleLink.style.color = "#4CAF50";
-                } else {
-                    statusText.innerText = "Conectar Conta Google";
-                    googleLink.style.color = "#fbbc05";
-                }
-            } catch (err) {
-                console.error("Erro ao verificar status Google:", err);
+                const resposta = await fetch('/api/google/status');
+                if (!resposta.ok) throw new Error('Não foi possível consultar a conexão Google.');
+                const dados = await resposta.json();
+                const texto = document.getElementById('google-status-text');
+                const link = document.getElementById('google-link');
+                texto.textContent = dados.conectado ? 'Google conectado' : 'Conectar Google';
+                link.classList.toggle('connected', dados.conectado);
+            } catch (erro) {
+                console.error(erro);
+                mostrarAviso('Não foi possível verificar a conexão com o Google.');
             }
         }
 
         async function carregarHistoricoChats() {
             try {
-                const res = await fetch('/api/chats');
-                const chats = await res.json();
-                const historyContainer = document.getElementById('sidebar-history');
-                historyContainer.innerHTML = '';
-
-                chats.forEach(chat => {
-                    const item = document.createElement('div');
-                    item.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
-                    item.innerText = chat.title;
-                    item.onclick = () => selecionarChat(chat.id);
-                    historyContainer.appendChild(item);
-                });
-            } catch (err) {
-                console.error("Erro ao carregar histórico:", err);
+                const resposta = await fetch('/api/chats');
+                if (!resposta.ok) throw new Error('Não foi possível carregar as conversas.');
+                allChats = await resposta.json();
+                renderizarHistorico();
+            } catch (erro) {
+                console.error(erro);
+                elements.history.replaceChildren(criarTexto('p', 'Não foi possível carregar o histórico.', 'history-placeholder'));
             }
         }
 
+        function renderizarHistorico() {
+            const termo = elements.search.value.trim().toLocaleLowerCase('pt-BR');
+            const conversas = allChats.filter((chat) => chat.title.toLocaleLowerCase('pt-BR').includes(termo));
+            elements.history.replaceChildren();
+            document.getElementById('history-count').textContent = allChats.length ? String(allChats.length) : '';
+
+            if (!conversas.length) {
+                const texto = termo ? 'Nenhuma conversa encontrada.' : 'Suas conversas aparecerão aqui.';
+                elements.history.appendChild(criarTexto('p', texto, 'history-placeholder'));
+                return;
+            }
+
+            conversas.forEach((chat) => {
+                const item = document.createElement('div');
+                item.className = `history-item${chat.id === currentChatId ? ' active' : ''}`;
+
+                const openButton = document.createElement('button');
+                openButton.className = 'history-open';
+                openButton.type = 'button';
+                openButton.title = chat.title;
+                openButton.textContent = chat.title;
+                openButton.addEventListener('click', () => selecionarChat(chat.id));
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'history-delete icon-button';
+                deleteButton.type = 'button';
+                deleteButton.setAttribute('aria-label', `Excluir conversa: ${chat.title}`);
+                deleteButton.title = 'Excluir conversa';
+                deleteButton.innerHTML = '<i class="fa-regular fa-trash-can" aria-hidden="true"></i>';
+                deleteButton.addEventListener('click', () => excluirChat(chat.id));
+
+                item.append(openButton, deleteButton);
+                elements.history.appendChild(item);
+            });
+        }
+
         async function selecionarChat(chatId) {
-            currentChatId = chatId;
-            carregarHistoricoChats();
-
             try {
-                const res = await fetch(`/api/chats/${chatId}/messages`);
-                const mensagens = await res.json();
-                const chatMessages = document.getElementById('chat-messages');
-                chatMessages.innerHTML = '';
-
-                if (mensagens.length === 0) {
-                    chatMessages.innerHTML = `<div class="welcome-banner"><h1>{{ saudacao }}, como posso ajudar na sua análise de dados hoje?</h1></div>`;
-                    return;
-                }
-
-                mensagens.forEach(msg => {
-                    if (msg.sender === 'user') {
-                        chatMessages.innerHTML += `
-                            <div class="message user-message" style="margin: 10px 0; padding: 10px; background: #2f2f2f; border-radius: 8px; max-width: 80%; align-self: flex-end;">
-                                <p><strong>Você:</strong> ${msg.content}</p>
-                            </div>`;
-                    } else {
-                        chatMessages.innerHTML += `
-                            <div class="message ai-message" style="margin: 10px 0; padding: 10px; background: #171717; border-radius: 8px; max-width: 80%; border: 1px solid #2f2f2f;">
-                                <p><strong>CodeFusion IA:</strong></p>
-                                <p style="white-space: pre-wrap; margin-top: 5px;">${msg.content}</p>
-                            </div>`;
-                    }
-                });
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            } catch (err) {
-                console.error("Erro ao carregar mensagens:", err);
+                const resposta = await fetch(`/api/chats/${chatId}/messages`);
+                const dados = await resposta.json();
+                if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível abrir esta conversa.');
+                currentChatId = chatId;
+                elements.messages.replaceChildren();
+                dados.forEach(adicionarMensagem);
+                renderizarHistorico();
+                document.querySelector('.sidebar').classList.remove('mobile-open');
+                rolarParaFinal();
+            } catch (erro) {
+                console.error(erro);
+                mostrarAviso(erro.message);
             }
         }
 
         function iniciarNovoChat() {
             currentChatId = null;
+            document.querySelector('.sidebar').classList.remove('mobile-open');
+            removerArquivo();
+            elements.input.value = '';
+            ajustarAlturaEntrada();
+            mostrarBoasVindas();
+            renderizarHistorico();
+            elements.input.focus();
+        }
+
+        function mostrarBoasVindas() {
+            const banner = document.createElement('div');
+            banner.className = 'welcome-banner';
+            banner.id = 'welcome-banner';
+            banner.innerHTML = `
+                <img class="welcome-icon" src="{{ url_for('static', filename='img/imag.png') }}" alt="Andreza IA">
+                <p class="welcome-eyebrow">Sua assistente para dados e ideias</p>
+                <h1>{{ saudacao }}. O que vamos criar?</h1>
+                <p class="welcome-description">Converse com a Andreza, analise planilhas ou transforme uma ideia em realidade.</p>
+                <div class="prompt-suggestions" aria-label="Sugestões de conversa">
+                    <button class="prompt-card" type="button" data-prompt="Analise esta planilha e destaque os principais insights"><i class="fa-solid fa-chart-column"></i><span><strong>Analisar uma planilha</strong><small>Encontre tendências e insights</small></span></button>
+                    <button class="prompt-card" type="button" data-prompt="Crie um gráfico claro para apresentar os principais dados"><i class="fa-solid fa-chart-pie"></i><span><strong>Criar um gráfico</strong><small>Visualize seus dados</small></span></button>
+                    <button class="prompt-card" type="button" data-prompt="Me ajude a automatizar uma tarefa repetitiva"><i class="fa-solid fa-bolt"></i><span><strong>Automatizar uma tarefa</strong><small>Comece com uma ideia</small></span></button>
+                </div>`;
+            elements.messages.replaceChildren(banner);
+            banner.querySelectorAll('.prompt-card').forEach((card) => {
+                card.addEventListener('click', () => {
+                    elements.input.value = card.dataset.prompt;
+                    elements.input.focus();
+                    ajustarAlturaEntrada();
+                });
+            });
+        }
+
+        function selecionarArquivo(arquivo) {
+            selectedFile = arquivo;
+            elements.fileIndicator.hidden = !arquivo;
+            document.getElementById('file-name').textContent = arquivo ? arquivo.name : '';
+        }
+
+        function removerArquivo() {
             selectedFile = null;
-            document.getElementById('file-upload').value = '';
-            document.getElementById('file-indicator').style.display = 'none';
-            document.getElementById('chat-messages').innerHTML = `<div class="welcome-banner" id="welcome-banner"><h1>{{ saudacao }}, como posso ajudar na sua análise de dados hoje?</h1></div>`;
-            carregarHistoricoChats();
+            elements.fileInput.value = '';
+            elements.fileIndicator.hidden = true;
+            document.getElementById('file-name').textContent = '';
+        }
+
+        function ajustarAlturaEntrada() {
+            elements.input.style.height = 'auto';
+            elements.input.style.height = `${Math.min(elements.input.scrollHeight, 180)}px`;
         }
 
         async function enviarMensagem() {
-            const input = document.getElementById('user-input');
-            const mensagem = input.value.trim();
-            const modelo = document.getElementById('llm-model').value;
+            const mensagem = elements.input.value.trim();
+            if ((!mensagem && !selectedFile) || elements.sendButton.disabled) return;
 
-            if (!mensagem && !selectedFile) return;
-
-            const chatMessages = document.getElementById('chat-messages');
-            const welcomeBanner = document.getElementById('welcome-banner');
-            if (welcomeBanner) welcomeBanner.remove();
-
-            let displayText = mensagem;
-            if (selectedFile) displayText += ` 📎 [${selectedFile.name}]`;
-
-            chatMessages.innerHTML += `
-                <div class="message user-message" style="margin: 10px 0; padding: 10px; background: #2f2f2f; border-radius: 8px; max-width: 80%; align-self: flex-end;">
-                    <p><strong>Você:</strong> ${displayText}</p>
-                </div>`;
-
+            document.getElementById('welcome-banner')?.remove();
+            adicionarMensagem({ sender: 'user', content: mensagem + (selectedFile ? ` 📎 ${selectedFile.name}` : '') });
             const formData = new FormData();
-            formData.append("chat_id", currentChatId);
-            formData.append("mensagem", mensagem);
-            formData.append("modelo", modelo);
-            if (selectedFile) {
-                formData.append("file", selectedFile);
-            }
+            formData.append('chat_id', currentChatId || '');
+            formData.append('mensagem', mensagem);
+            formData.append('modelo', document.getElementById('llm-model').value);
+            if (selectedFile) formData.append('file', selectedFile);
 
-            input.value = '';
-            selectedFile = null;
-            document.getElementById('file-upload').value = '';
-            document.getElementById('file-indicator').style.display = 'none';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            elements.input.value = '';
+            ajustarAlturaEntrada();
+            removerArquivo();
+            elements.sendButton.disabled = true;
+            elements.sendButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>';
+            const indicador = criarTexto('div', 'A Andreza está pensando...', 'thinking-indicator');
+            indicador.setAttribute('role', 'status');
+            elements.messages.appendChild(indicador);
+            rolarParaFinal();
 
             try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                currentChatId = data.chat_id;
-
-                let aiHtml = `<p style="white-space: pre-wrap; margin-top: 5px;">${data.resposta}</p>`;
-                if (data.chart_url) {
-                    aiHtml += `<div style="margin-top: 10px;"><img src="${data.chart_url}" alt="Gráfico de Análise" style="max-width: 100%; border-radius: 6px;"></div>`;
-                }
-
-                chatMessages.innerHTML += `
-                    <div class="message ai-message" style="margin: 10px 0; padding: 10px; background: #171717; border-radius: 8px; max-width: 80%; border: 1px solid #2f2f2f;">
-                        <p><strong>CodeFusion IA (${modelo}):</strong></p>
-                        ${aiHtml}
-                    </div>`;
-
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                carregarHistoricoChats();
-            } catch (error) {
-                console.error("Erro:", error);
+                const resposta = await fetch('/api/chat', { method: 'POST', body: formData });
+                const dados = await resposta.json();
+                if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível enviar a mensagem.');
+                currentChatId = dados.chat_id;
+                indicador.remove();
+                adicionarMensagem({ sender: 'ai', content: dados.resposta, chart_url: dados.chart_url });
+                await carregarHistoricoChats();
+            } catch (erro) {
+                indicador.remove();
+                console.error(erro);
+                mostrarAviso(erro.message || 'Ocorreu um erro ao enviar sua mensagem.');
+            } finally {
+                elements.sendButton.disabled = false;
+                elements.sendButton.innerHTML = '<i class="fa-solid fa-arrow-up" aria-hidden="true"></i>';
+                elements.input.focus();
             }
+        }
+
+        function adicionarMensagem(mensagem) {
+            const mensagemEl = document.createElement('article');
+            mensagemEl.className = `message ${mensagem.sender === 'user' ? 'user-message' : 'ai-message'}`;
+            const cabecalho = criarTexto('div', mensagem.sender === 'user' ? 'Você' : 'Andreza IA', 'message-author');
+            mensagemEl.appendChild(cabecalho);
+
+            const conteudo = criarTexto('p', mensagem.content || '', 'message-content');
+            mensagemEl.appendChild(conteudo);
+            if (mensagem.chart_url) {
+                const imagem = document.createElement('img');
+                imagem.src = mensagem.chart_url;
+                imagem.alt = 'Gráfico criado a partir dos dados analisados';
+                imagem.className = 'message-chart';
+                mensagemEl.appendChild(imagem);
+            }
+            if (mensagem.sender !== 'user') {
+                const copiar = document.createElement('button');
+                copiar.className = 'copy-button icon-button';
+                copiar.type = 'button';
+                copiar.title = 'Copiar resposta';
+                copiar.setAttribute('aria-label', 'Copiar resposta');
+                copiar.innerHTML = '<i class="fa-regular fa-copy" aria-hidden="true"></i>';
+                copiar.addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(mensagem.content || '');
+                        mostrarAviso('Resposta copiada.');
+                    } catch (erro) {
+                        console.error(erro);
+                        mostrarAviso('Não foi possível copiar a resposta.');
+                    }
+                });
+                mensagemEl.appendChild(copiar);
+            }
+            elements.messages.appendChild(mensagemEl);
+            rolarParaFinal();
+        }
+
+        async function excluirChat(chatId) {
+            const chat = allChats.find((item) => item.id === chatId);
+            if (!chat || !window.confirm(`Excluir a conversa "${chat.title}"? Essa ação não pode ser desfeita.`)) return;
+            try {
+                const resposta = await fetch(`/api/chats/${chatId}`, { method: 'DELETE' });
+                const dados = await resposta.json();
+                if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível excluir a conversa.');
+                if (currentChatId === chatId) iniciarNovoChat();
+                await carregarHistoricoChats();
+                mostrarAviso('Conversa excluída.');
+            } catch (erro) {
+                console.error(erro);
+                mostrarAviso(erro.message);
+            }
+        }
+
+        function abrirBusca() {
+            elements.searchWrap.hidden = false;
+            elements.search.focus();
+        }
+
+        function fecharBusca() {
+            elements.search.value = '';
+            elements.searchWrap.hidden = true;
+            renderizarHistorico();
+        }
+
+        function criarTexto(tag, texto, classe) {
+            const elemento = document.createElement(tag);
+            elemento.className = classe;
+            elemento.textContent = texto;
+            return elemento;
+        }
+
+        function rolarParaFinal() {
+            elements.messages.scrollTop = elements.messages.scrollHeight;
+        }
+
+        function mostrarAviso(texto) {
+            const toast = document.getElementById('toast');
+            toast.textContent = texto;
+            toast.classList.add('visible');
+            window.clearTimeout(toastTimeout);
+            toastTimeout = window.setTimeout(() => toast.classList.remove('visible'), 3200);
         }
     </script>
 </body>

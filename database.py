@@ -20,8 +20,16 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Habilita a extensão pgvector no PostgreSQL
-    cursor.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    # Habilita a extensão pgvector no PostgreSQL (ela precisa estar instalada no servidor).
+    try:
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    except psycopg2.errors.FeatureNotSupported as exc:
+        cursor.close()
+        conn.close()
+        raise RuntimeError(
+            "A extensão pgvector não está instalada no servidor PostgreSQL. "
+            "Instale o pgvector no servidor e execute novamente."
+        ) from exc
 
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS users

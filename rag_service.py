@@ -21,7 +21,7 @@ def gerar_embedding(texto):
 
 
 def salvar_memoria_vetorial(user_id, chat_id, texto):
-    """Salva um trecho de texto e seu respectivo vetor no PostgreSQL."""
+    """Salva um trecho de texto e o seu respetivo vetor no PostgreSQL."""
     vetor = gerar_embedding(texto)
     if not vetor:
         return
