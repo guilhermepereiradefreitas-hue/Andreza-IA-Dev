@@ -2,8 +2,6 @@
   <img src="static/img/login.png" alt="Andreza IA" width="720">
 </p>
 
-<h1 align="center">Andreza IA</h1>
-
 <p align="center">
   Assistente de inteligência artificial para análise de dados, planilhas e automação.
 </p>
