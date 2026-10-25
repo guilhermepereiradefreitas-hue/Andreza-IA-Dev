@@ -2,6 +2,8 @@
   <img src="static/img/login.png" alt="Andreza IA" width="720">
 </p>
 
+<h1 align="center">Andreza IA</h1>
+
 <p align="center">
   Assistente de inteligência artificial para análise de dados, planilhas e automação.
 </p>
@@ -35,13 +37,14 @@ A Andreza IA é uma aplicação web desenvolvida em Python e Flask, com uma inte
 
 ## Funcionalidades
 
-- **Conversas:** criar conversas, consultar o histórico, pesquisar conversas e excluir chats.
-- **Modelos de IA:** selecionar GPT-4o (OpenAI) ou Gemini 2.5 Flash (Google) pela interface.
+- **Conversas:** iniciar chats, consultar e pesquisar o histórico e excluir conversas.
+- **Modelos de IA:** selecionar GPT-4o (OpenAI) ou Gemini 2.5 Flash (Google) diretamente no campo de mensagem.
 - **Análise de arquivos:** enviar arquivos CSV e Excel (`.xlsx` e `.xls`) para análise com Pandas.
 - **Gráficos:** gerar gráficos PNG quando a solicitação de análise pede uma visualização compatível.
 - **Memória semântica (RAG):** armazenar trechos de conversas e recuperar contexto relevante com embeddings OpenAI e pgvector.
-- **Google Sheets:** conectar uma conta Google individual via OAuth 2.0 e acrescentar valores a uma planilha autorizada.
+- **Google Sheets:** conectar uma conta Google individual via OAuth 2.0 e acrescentar valores a uma planilha autorizada pela opção da barra lateral.
 - **Contas de usuário:** cadastro, login e senhas armazenadas com hash via Flask-Bcrypt.
+- **Barra lateral:** acessar novo chat, pesquisa, anexos de arquivos, conexão Google e histórico; clicar no logo recolhe ou expande a barra.
 - **Experiência de uso:** interface responsiva em português, sugestões de prompts, anexos e cópia de respostas.
 
 ## Tecnologias
@@ -141,11 +144,13 @@ Acesse [http://localhost:5000](http://localhost:5000), crie uma conta e entre na
 ## Como usar
 
 1. Entre ou crie uma conta.
-2. Inicie uma conversa ou selecione uma conversa existente no histórico.
-3. Escolha GPT-4o ou Gemini 2.5 Flash no seletor de modelos.
-4. Para analisar uma planilha, anexe um arquivo CSV ou Excel e escreva sua pergunta.
-5. Peça um gráfico na mensagem para visualizar os dados quando houver colunas numéricas compatíveis.
-6. Conecte sua conta Google para autorizar o uso da integração com planilhas.
+2. Use **Iniciar novo** na barra lateral para começar uma conversa ou selecione um chat em **Meus chats** para continuar.
+3. Clique em **Pesquisar** para filtrar as conversas do histórico.
+4. Escolha GPT-4o ou Gemini 2.5 Flash no seletor de modelos, localizado no campo de mensagem.
+5. Para analisar uma planilha, use **Arquivos e documentos** ou o botão de anexo no chat para enviar um arquivo CSV ou Excel e escreva sua pergunta.
+6. Peça um gráfico na mensagem para visualizar os dados quando houver colunas numéricas compatíveis.
+7. Use **Conectar Google** na barra lateral para autorizar o uso da integração com planilhas.
+8. Clique no logo da Andreza para recolher ou expandir a barra lateral.
 
 ## Estrutura do projeto
 

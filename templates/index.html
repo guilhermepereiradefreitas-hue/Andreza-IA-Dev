@@ -7,45 +7,39 @@
     <title>Andreza IA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="src/images/imag.png">
 </head>
 <body>
     <div class="app-container">
-        <nav class="icon-rail" aria-label="Navegação principal">
-            <button class="rail-button active" type="button" aria-label="Início" title="Início">
-                <i class="fa-solid fa-house"></i>
-            </button>
-            <button class="rail-button" id="history-shortcut" type="button" aria-label="Buscar conversas" title="Buscar conversas">
-                <i class="fa-regular fa-comments"></i>
-            </button>
-            <a class="rail-button" href="{{ url_for('google_auth') }}" aria-label="Conectar Google" title="Conectar Google">
-                <i class="fa-brands fa-google"></i>
-            </a>
-            <a class="rail-button rail-account" href="{{ url_for('logout') }}" aria-label="Sair da conta de {{ username }}" title="Sair">
-                {{ username[:2]|upper }}
-            </a>
-        </nav>
-
         <aside class="sidebar">
             <div class="sidebar-heading">
-                <a class="brand" href="{{ url_for('index') }}" aria-label="Andreza IA - início">
-                    <span class="brand-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
-                    <span>Andreza IA</span>
-                    <i class="fa-solid fa-chevron-down brand-chevron"></i>
-                </a>
-                <button class="icon-button" id="search-toggle" type="button" aria-label="Buscar conversas" title="Buscar conversas">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                <button class="brand-toggle" id="sidebar-toggle" type="button" aria-label="Recolher barra lateral" aria-expanded="true" title="Recolher barra lateral">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
                 </button>
             </div>
 
-            <button class="new-chat-btn" id="new-chat-btn" type="button">
-                <i class="fa-regular fa-pen-to-square"></i>
-                <span>Nova conversa</span>
-                <span class="shortcut-hint">＋</span>
-            </button>
+            <nav class="sidebar-navigation" aria-label="Navegação do chat">
+                <button class="sidebar-nav-item active" id="new-chat-btn" type="button" aria-label="Iniciar novo chat" title="Iniciar novo chat">
+                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                    <span>Iniciar novo</span>
+                </button>
+                <button class="sidebar-nav-item" id="search-toggle" type="button" aria-label="Pesquisar conversas" title="Pesquisar conversas">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <span>Pesquisar</span>
+                </button>
+                <label class="sidebar-nav-item" for="file-upload" aria-label="Anexar arquivo CSV ou Excel" title="Anexar arquivo CSV ou Excel">
+                    <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+                    <span>Arquivos e documentos</span>
+                </label>
+                <a class="sidebar-nav-item google-connect" id="google-link" href="{{ url_for('google_auth') }}" aria-label="Conectar Google" title="Conectar Google">
+                    <i class="fa-brands fa-google" aria-hidden="true"></i>
+                    <span id="google-status-text">Conectar Google</span>
+                </a>
+            </nav>
 
             <div class="history-section">
                 <div class="section-heading">
-                    <span>Conversas recentes</span>
+                    <span>Meus chats</span>
                     <span class="history-count" id="history-count"></span>
                 </div>
                 <label class="history-search" id="history-search-wrap" hidden>
@@ -79,20 +73,6 @@
                 <button class="mobile-menu-button icon-button" id="mobile-menu-toggle" type="button" aria-label="Abrir menu" title="Conversas">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <div class="header-model">
-                    <label for="llm-model" class="sr-only">Modelo de inteligência artificial</label>
-                    <select id="llm-model" aria-label="Modelo de inteligência artificial">
-                        <option value="gpt-4o">GPT-4o</option>
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                    </select>
-                    <span class="model-provider">Modelo de IA</span>
-                </div>
-                <div class="header-actions">
-                    <a class="google-connect" id="google-link" href="{{ url_for('google_auth') }}">
-                        <i class="fa-brands fa-google"></i>
-                        <span id="google-status-text">Conectar Google</span>
-                    </a>
-                </div>
             </header>
 
             <section class="chat-messages" id="chat-messages" aria-live="polite" aria-label="Mensagens da conversa">
@@ -130,6 +110,13 @@
                     <textarea id="user-input" rows="1" placeholder="Pergunte qualquer coisa..." aria-label="Escreva sua mensagem"></textarea>
                     <div class="composer-toolbar">
                         <div class="composer-tools">
+                            <label class="model-picker" title="Trocar modelo de inteligência artificial">
+                                <select id="llm-model" aria-label="Modelo de inteligência artificial">
+                                    <option value="gpt-4o">GPT-4o</option>
+                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                            </label>
                             <label for="file-upload" class="tool-button" title="Anexar planilha CSV ou Excel">
                                 <i class="fa-solid fa-plus"></i>
                                 <span>Anexar arquivo</span>
@@ -138,7 +125,6 @@
                             <span class="composer-hint">Enter para enviar · Shift + Enter para nova linha</span>
                         </div>
                         <div class="composer-actions">
-                            <label class="model-compact-label" for="llm-model">Andreza ·</label>
                             <button class="send-button" id="send-btn" type="button" aria-label="Enviar mensagem" title="Enviar mensagem">
                                 <i class="fa-solid fa-arrow-up"></i>
                             </button>
@@ -174,9 +160,9 @@
             verificarStatusGoogle();
 
             document.getElementById('new-chat-btn').addEventListener('click', iniciarNovoChat);
-            document.getElementById('history-shortcut').addEventListener('click', abrirBusca);
             document.getElementById('search-toggle').addEventListener('click', abrirBusca);
             document.getElementById('search-close').addEventListener('click', fecharBusca);
+            document.getElementById('sidebar-toggle').addEventListener('click', alternarBarraLateral);
             document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
                 document.querySelector('.sidebar').classList.toggle('mobile-open');
             });
@@ -447,6 +433,16 @@
             elements.search.value = '';
             elements.searchWrap.hidden = true;
             renderizarHistorico();
+        }
+
+        function alternarBarraLateral() {
+            const sidebar = document.querySelector('.sidebar');
+            const botao = document.getElementById('sidebar-toggle');
+            const recolhida = sidebar.classList.toggle('collapsed');
+            const acao = recolhida ? 'Expandir' : 'Recolher';
+            botao.setAttribute('aria-expanded', String(!recolhida));
+            botao.setAttribute('aria-label', `${acao} barra lateral`);
+            botao.title = `${acao} barra lateral`;
         }
 
         function criarTexto(tag, texto, classe) {
